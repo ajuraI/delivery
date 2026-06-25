@@ -5,8 +5,6 @@ import libs.errs.Error;
 import libs.errs.GeneralErrors;
 import libs.errs.Result;
 import libs.errs.UnitResult;
-import microarch.delivery.core.domain.model.courier.Assignment;
-import microarch.delivery.core.domain.model.courier.AssignmentStatus;
 import microarch.delivery.core.domain.model.kernel.Location;
 import microarch.delivery.core.domain.model.kernel.Volume;
 

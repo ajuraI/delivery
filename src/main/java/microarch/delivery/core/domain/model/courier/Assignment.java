@@ -15,6 +15,7 @@ import java.util.UUID;
 @Getter
 public class Assignment extends BaseEntity<UUID> {
     private UUID orderId;
+    @Getter
     private Volume volume;
     private Location location;
     private AssignmentStatus status;
@@ -75,5 +76,4 @@ public class Assignment extends BaseEntity<UUID> {
     private static Error required(Object value, String paramName) {
         return value == null ? GeneralErrors.valueIsRequired(paramName) : null;
     }
-
 }
