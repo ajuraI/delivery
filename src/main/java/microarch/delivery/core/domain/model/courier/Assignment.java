@@ -58,11 +58,11 @@ public class Assignment extends BaseEntity<UUID> {
             return UnitResult.failure(validationError);
         }
 
-        if (status == AssignmentStatus.COMPLETED) {
+        if (status != AssignmentStatus.ASSIGNED) {
             return UnitResult.failure(GeneralErrors.valueIsInvalid("status", status));
         }
 
-        if (location.distanceTo(courierLocation) > 1) {
+        if (location.distanceTo(courierLocation) > Location.MIN_COORDINATE) {
             return UnitResult.failure(
                     GeneralErrors.valueIsInvalid("courierLocation", courierLocation)
             );
