@@ -14,6 +14,8 @@ import java.util.UUID;
 
 @Getter
 public class Assignment extends BaseEntity<UUID> {
+    private static final int MAX_DISTANCE_TO_COMPLETE = 1;
+
     private UUID orderId;
     @Getter
     private Volume volume;
@@ -63,7 +65,7 @@ public class Assignment extends BaseEntity<UUID> {
             return UnitResult.failure(GeneralErrors.valueIsInvalid("status", status));
         }
 
-        if (location.distanceTo(courierLocation) > Location.MIN_COORDINATE) {
+        if (location.distanceTo(courierLocation) > MAX_DISTANCE_TO_COMPLETE) {
             return UnitResult.failure(
                     GeneralErrors.valueIsInvalid("courierLocation", courierLocation)
             );
