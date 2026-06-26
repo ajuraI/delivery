@@ -35,7 +35,7 @@ public class Courier extends Aggregate<UUID> {
         super(id);
         this.name = name;
         this.location = location;
-        this.maxVolume = Volume.create(MAX_VOLUME).getValue();
+        this.maxVolume = Volume.mustCreate(MAX_VOLUME);
     }
 
     public static Result<Courier, Error> create(String name, Location location) {
@@ -62,21 +62,23 @@ public class Courier extends Aggregate<UUID> {
     }
 
     public UnitResult<Error> takeOrder(Order order) {
-        if (!canTakeOneMoreOrder(order.getVolume())) {
-            return UnitResult.failure(GeneralErrors.valueIsInvalid("volume", order.getVolume()));
+        Error validationError = required(order, "order");
+
+        if (validationError != null) {
+            return UnitResult.failure(validationError);
         }
 
-        UnitResult<Error> assignOrderResult = order.assign();
-        if (assignOrderResult.isFailure()) {
-            return assignOrderResult;
-        }
-
-        Assignment assignment = Assignment.create(
+        Result<Assignment, Error> assignmentResult = Assignment.create(
                 order.getId(),
                 order.getVolume(),
                 order.getLocation()
-        ).getValue();
-        assignments.add(assignment);
+        );
+
+        if (assignmentResult.isFailure()) {
+            return UnitResult.failure(assignmentResult.getError());
+        }
+
+        assignments.add(assignmentResult.getValue());
         return UnitResult.success();
     }
 
@@ -92,8 +94,15 @@ public class Courier extends Aggregate<UUID> {
         return assignment.get().complete(location);
     }
 
-    public void changeLocation(Location newLocation) {
+    public UnitResult<Error> changeLocation(Location newLocation) {
+        Error validationError = required(newLocation, "newLocation");
+
+        if (validationError != null) {
+            return UnitResult.failure(validationError);
+        }
+
         location = newLocation;
+        return UnitResult.success();
     }
 
     private int currentAssignedVolume() {
