@@ -82,13 +82,13 @@ public class Courier extends Aggregate<UUID> {
         return UnitResult.success();
     }
 
-    public UnitResult<Error> completeAssignment(UUID orderId) {
+    public UnitResult<Error> completeAssignment(UUID assignmentId) {
         Optional<Assignment> assignment = assignments.stream()
-                .filter(item -> item.getOrderId().equals(orderId))
+                .filter(item -> item.getId().equals(assignmentId))
                 .findFirst();
 
         if (assignment.isEmpty()) {
-            return UnitResult.failure(GeneralErrors.notFound("assignment", orderId));
+            return UnitResult.failure(GeneralErrors.notFound("assignment", assignmentId));
         }
 
         return assignment.get().complete(location);
