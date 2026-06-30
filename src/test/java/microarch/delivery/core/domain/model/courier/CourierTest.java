@@ -52,8 +52,12 @@ class CourierTest {
         courier.takeOrder(closeOrder);
         courier.takeOrder(farOrder);
 
-        UnitResult<Error> closeResult = courier.completeAssignment(closeOrder.getId());
-        UnitResult<Error> farResult = courier.completeAssignment(farOrder.getId());
+        UnitResult<Error> closeResult = courier.completeAssignment(
+                courier.getAssignments().getFirst().getId()
+        );
+        UnitResult<Error> farResult = courier.completeAssignment(
+                courier.getAssignments().get(1).getId()
+        );
 
         assertThat(closeResult.isSuccess()).isTrue();
         assertThat(farResult.isFailure()).isTrue();
