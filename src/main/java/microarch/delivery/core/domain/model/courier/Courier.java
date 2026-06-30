@@ -68,6 +68,10 @@ public class Courier extends Aggregate<UUID> {
             return UnitResult.failure(validationError);
         }
 
+        if (!canTakeOneMoreOrder(order.getVolume())) {
+            return UnitResult.failure(GeneralErrors.valueIsInvalid("volume", order.getVolume()));
+        }
+
         Result<Assignment, Error> assignmentResult = Assignment.create(
                 order.getId(),
                 order.getVolume(),
