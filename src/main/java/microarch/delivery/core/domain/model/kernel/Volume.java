@@ -25,6 +25,10 @@ public final class Volume extends ValueObject<Volume> {
         return Result.success(new Volume(value));
     }
 
+    public static Volume mustCreate(int value) {
+        return create(value).getValueOrThrow();
+    }
+
     public int getValue() {
         return value;
     }
