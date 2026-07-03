@@ -4,7 +4,6 @@ import microarch.delivery.core.domain.model.order.Order;
 import microarch.delivery.core.domain.model.order.OrderStatus;
 import microarch.delivery.core.ports.OrderRepository;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -21,19 +20,16 @@ public class PostgresOrderRepository implements OrderRepository {
     }
 
     @Override
-    @Transactional
     public void add(Order order) {
         save(order);
     }
 
     @Override
-    @Transactional
     public void update(Order order) {
         save(order);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Optional<Order> getById(UUID id) {
         Objects.requireNonNull(id, "id must not be null");
 
@@ -41,13 +37,11 @@ public class PostgresOrderRepository implements OrderRepository {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Optional<Order> getAnyCreated() {
         return repository.findFirstByStatus(OrderStatus.CREATED).map(OrderJpaEntity::toDomain);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<Order> getAllAssigned() {
         return repository.findAllByStatus(OrderStatus.ASSIGNED).stream()
                 .map(OrderJpaEntity::toDomain)
