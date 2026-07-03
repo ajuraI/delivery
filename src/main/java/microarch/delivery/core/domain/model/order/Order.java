@@ -42,6 +42,20 @@ public class Order extends Aggregate<UUID> {
         return Result.success(new Order(id, volume, location));
     }
 
+    public static Result<Order, Error> restore(UUID id, Location location, Volume volume, OrderStatus status) {
+        Error validationError = Guard.combine(Guard.againstNullOrEmpty(id, "id"),
+                required(location, "location"), required(volume, "volume"),
+                required(status, "status"));
+
+        if (validationError != null) {
+            return Result.failure(validationError);
+        }
+
+        Order order = new Order(id, volume, location);
+        order.status = status;
+        return Result.success(order);
+    }
+
     public UnitResult<Error> assign() {
         if (status != OrderStatus.CREATED) {
             return UnitResult.failure(GeneralErrors.valueIsInvalid("status", status));
