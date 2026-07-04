@@ -1,10 +1,10 @@
 package microarch.delivery.core.application.queries;
 
-import microarch.delivery.core.domain.model.order.Order;
+import microarch.delivery.core.application.queries.dto.IncompleteOrderDto;
 
 import java.util.List;
 
 public interface GetAllIncompleteOrdersQueryHandler {
 
-    List<Order> handle(GetAllIncompleteOrdersQuery query);
+    List<IncompleteOrderDto> handle(GetAllIncompleteOrdersQuery query);
 }

@@ -1,6 +1,7 @@
 package microarch.delivery.core.application.queries;
 
-import microarch.delivery.core.domain.model.order.Order;
+import microarch.delivery.core.application.queries.dto.IncompleteOrderDto;
+import microarch.delivery.core.application.queries.dto.LocationDto;
 import microarch.delivery.core.ports.OrderRepository;
 import org.springframework.stereotype.Service;
 
@@ -17,9 +18,14 @@ public class GetAllIncompleteOrdersQueryHandlerImpl implements GetAllIncompleteO
     }
 
     @Override
-    public List<Order> handle(GetAllIncompleteOrdersQuery query) {
+    public List<IncompleteOrderDto> handle(GetAllIncompleteOrdersQuery query) {
         Objects.requireNonNull(query, "query must not be null");
 
-        return orderRepository.getAllIncomplete();
+        return orderRepository.getAllIncomplete().stream()
+                .map(order -> new IncompleteOrderDto(
+                        order.getId(),
+                        new LocationDto(order.getLocation().getX(), order.getLocation().getY())
+                ))
+                .toList();
     }
 }
