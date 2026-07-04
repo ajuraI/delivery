@@ -13,6 +13,7 @@ import microarch.delivery.core.domain.model.order.Order;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -38,6 +39,14 @@ public class Courier extends Aggregate<UUID> {
         this.maxVolume = Volume.mustCreate(MAX_VOLUME);
     }
 
+    private Courier(UUID id, String name, Location location, Volume maxVolume, List<Assignment> assignments) {
+        super(id);
+        this.name = name;
+        this.location = location;
+        this.maxVolume = maxVolume;
+        this.assignments.addAll(assignments);
+    }
+
     public static Result<Courier, Error> create(String name, Location location) {
         return create(UUID.randomUUID(), name, location);
     }
@@ -51,6 +60,28 @@ public class Courier extends Aggregate<UUID> {
         }
 
         return Result.success(new Courier(id, name, location));
+    }
+
+    public static Result<Courier, Error> restore(
+            UUID id,
+            String name,
+            Location location,
+            Volume maxVolume,
+            List<Assignment> assignments
+    ) {
+        Error validationError = Guard.combine(Guard.againstNullOrEmpty(id, "id"),
+                Guard.againstNullOrEmpty(name, "name"), required(location, "location"),
+                required(maxVolume, "maxVolume"), required(assignments, "assignments"));
+
+        if (validationError != null) {
+            return Result.failure(validationError);
+        }
+
+        if (assignments.stream().anyMatch(Objects::isNull)) {
+            return Result.failure(GeneralErrors.valueIsInvalid("assignments", assignments));
+        }
+
+        return Result.success(new Courier(id, name, location, maxVolume, assignments));
     }
 
     public boolean canTakeOneMoreOrder(Volume volume) {

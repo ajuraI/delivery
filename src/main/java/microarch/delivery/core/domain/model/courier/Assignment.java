@@ -54,6 +54,26 @@ public class Assignment extends BaseEntity<UUID> {
         return Result.success(new Assignment(id, orderId, volume, location));
     }
 
+    public static Result<Assignment, Error> restore(
+            UUID id,
+            UUID orderId,
+            Volume volume,
+            Location location,
+            AssignmentStatus status
+    ) {
+        Error validationError = Guard.combine(Guard.againstNullOrEmpty(id, "id"),
+                Guard.againstNullOrEmpty(orderId, "orderId"), required(volume, "volume"),
+                required(location, "location"), required(status, "status"));
+
+        if (validationError != null) {
+            return Result.failure(validationError);
+        }
+
+        Assignment assignment = new Assignment(id, orderId, volume, location);
+        assignment.status = status;
+        return Result.success(assignment);
+    }
+
     public UnitResult<Error> complete(Location courierLocation) {
         Error validationError = required(courierLocation, "courierLocation");
 
