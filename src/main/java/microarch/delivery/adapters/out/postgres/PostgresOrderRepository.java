@@ -48,6 +48,14 @@ public class PostgresOrderRepository implements OrderRepository {
                 .toList();
     }
 
+    @Override
+    public List<Order> getAllIncomplete() {
+        return repository.findAllByStatusIn(List.of(OrderStatus.CREATED, OrderStatus.ASSIGNED))
+                .stream()
+                .map(OrderJpaEntity::toDomain)
+                .toList();
+    }
+
     private void save(Order order) {
         Objects.requireNonNull(order, "order must not be null");
 
