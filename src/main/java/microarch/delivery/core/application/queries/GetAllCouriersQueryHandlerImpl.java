@@ -1,8 +1,6 @@
-package microarch.delivery.adapters.out.postgres.queries;
+package microarch.delivery.core.application.queries;
 
 import jakarta.persistence.EntityManager;
-import microarch.delivery.core.application.queries.GetAllCouriersQuery;
-import microarch.delivery.core.application.queries.GetAllCouriersQueryHandler;
 import microarch.delivery.core.application.queries.dto.CourierDto;
 import microarch.delivery.core.application.queries.dto.LocationDto;
 import org.springframework.stereotype.Service;
@@ -12,11 +10,11 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Service
-public class PostgresGetAllCouriersQueryHandler implements GetAllCouriersQueryHandler {
+public class GetAllCouriersQueryHandlerImpl implements GetAllCouriersQueryHandler {
 
     private final EntityManager entityManager;
 
-    public PostgresGetAllCouriersQueryHandler(EntityManager entityManager) {
+    public GetAllCouriersQueryHandlerImpl(EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 

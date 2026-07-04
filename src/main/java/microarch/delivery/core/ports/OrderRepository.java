@@ -17,6 +17,4 @@ public interface OrderRepository {
     Optional<Order> getAnyCreated();
 
     List<Order> getAllAssigned();
-
-    List<Order> getAllIncomplete();
 }
