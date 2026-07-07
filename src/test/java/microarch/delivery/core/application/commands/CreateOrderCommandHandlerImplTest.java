@@ -2,10 +2,12 @@ package microarch.delivery.core.application.commands;
 
 import libs.errs.Error;
 import libs.errs.UnitResult;
+import microarch.delivery.adapters.out.grpc.GeoClientImpl;
 import microarch.delivery.core.domain.model.kernel.Location;
 import microarch.delivery.core.domain.model.kernel.Volume;
 import microarch.delivery.core.domain.model.order.Order;
 import microarch.delivery.core.domain.model.order.OrderStatus;
+import microarch.delivery.core.ports.GeoClient;
 import microarch.delivery.core.ports.OrderRepository;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -21,7 +23,8 @@ class CreateOrderCommandHandlerImplTest {
     @Test
     void createsOrderAndSavesIt() {
         OrderRepository orderRepository = mock(OrderRepository.class);
-        CreateOrderCommandHandler handler = new CreateOrderCommandHandlerImpl(orderRepository);
+        GeoClient geoClient = mock(GeoClientImpl.class);
+        CreateOrderCommandHandler handler = new CreateOrderCommandHandlerImpl(orderRepository, geoClient);
         UUID orderId = UUID.randomUUID();
 
         UnitResult<Error> result = handler.handle(new CreateOrderCommand(

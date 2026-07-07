@@ -8,6 +8,7 @@ import libs.errs.UnitResult;
 import microarch.delivery.core.domain.model.kernel.Location;
 import microarch.delivery.core.domain.model.kernel.Volume;
 import microarch.delivery.core.domain.model.order.Order;
+import microarch.delivery.core.ports.GeoClient;
 import microarch.delivery.core.ports.OrderRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,9 +19,11 @@ import java.util.concurrent.ThreadLocalRandom;
 public class CreateOrderCommandHandlerImpl implements CreateOrderCommandHandler {
 
     private final OrderRepository orderRepository;
+    private final GeoClient geoClient;
 
-    public CreateOrderCommandHandlerImpl(OrderRepository orderRepository) {
+    public CreateOrderCommandHandlerImpl(OrderRepository orderRepository, GeoClient geoClient) {
         this.orderRepository = orderRepository;
+        this.geoClient = geoClient;
     }
 
     @Override
@@ -38,9 +41,15 @@ public class CreateOrderCommandHandlerImpl implements CreateOrderCommandHandler 
             return UnitResult.failure(volumeResult.getError());
         }
 
+        var location = geoClient.getGeolocation(command.street());
+
+        if (location.isFailure()) {
+            return UnitResult.failure(location.getError());
+        }
+
         Result<Order, Error> orderResult = Order.create(
                 command.orderId(),
-                randomLocation(),
+                location.getValue(),
                 volumeResult.getValue()
         );
 
