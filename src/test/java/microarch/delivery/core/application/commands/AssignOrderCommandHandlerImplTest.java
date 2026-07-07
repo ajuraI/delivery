@@ -7,6 +7,8 @@ import microarch.delivery.core.domain.model.kernel.Location;
 import microarch.delivery.core.domain.model.kernel.Volume;
 import microarch.delivery.core.domain.model.order.Order;
 import microarch.delivery.core.domain.model.order.OrderStatus;
+import microarch.delivery.core.domain.services.OrderDistributionDomainService;
+import microarch.delivery.core.domain.services.OrderDistributionDomainServiceImpl;
 import microarch.delivery.core.ports.CourierRepository;
 import microarch.delivery.core.ports.OrderRepository;
 import org.junit.jupiter.api.Test;
@@ -34,7 +36,8 @@ class AssignOrderCommandHandlerImplTest {
         Courier courier = Courier.create("Ivan", new Location(2, 2)).getValue();
         when(orderRepository.getAnyCreated()).thenReturn(Optional.of(order));
         when(courierRepository.getAll()).thenReturn(List.of(courier));
-        AssignOrderCommandHandler handler = new AssignOrderCommandHandlerImpl(orderRepository, courierRepository);
+        OrderDistributionDomainService orderDistributionDomainService = new OrderDistributionDomainServiceImpl();
+        AssignOrderCommandHandler handler = new AssignOrderCommandHandlerImpl(orderRepository, courierRepository, orderDistributionDomainService);
 
         UnitResult<Error> result = handler.handle(new AssignOrderCommand());
 

@@ -20,14 +20,16 @@ public class AssignOrderCommandHandlerImpl implements AssignOrderCommandHandler 
 
     private final OrderRepository orderRepository;
     private final CourierRepository courierRepository;
-    private final OrderDistributionDomainService orderDistributionDomainService = new OrderDistributionDomainServiceImpl();
+    private final OrderDistributionDomainService orderDistributionDomainService;
 
     public AssignOrderCommandHandlerImpl(
             OrderRepository orderRepository,
-            CourierRepository courierRepository
+            CourierRepository courierRepository,
+            OrderDistributionDomainService orderDistributionDomainService
     ) {
         this.orderRepository = orderRepository;
         this.courierRepository = courierRepository;
+        this.orderDistributionDomainService = orderDistributionDomainService;
     }
 
     @Override
