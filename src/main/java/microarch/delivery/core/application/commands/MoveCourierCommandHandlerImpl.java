@@ -5,6 +5,7 @@ import libs.errs.GeneralErrors;
 import libs.errs.Guard;
 import libs.errs.UnitResult;
 import microarch.delivery.core.domain.model.courier.Courier;
+import microarch.delivery.core.domain.model.kernel.Location;
 import microarch.delivery.core.ports.CourierRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +34,8 @@ public class MoveCourierCommandHandlerImpl implements MoveCourierCommandHandler 
             return UnitResult.failure(GeneralErrors.notFound("courier", command.courierId()));
         }
 
-        UnitResult<Error> changeLocationResult = courier.changeLocation(command.location());
+        Location location = new Location(command.locationX(), command.locationY());
+        UnitResult<Error> changeLocationResult = courier.changeLocation(location);
 
         if (changeLocationResult.isFailure()) {
             return changeLocationResult;
@@ -49,6 +51,9 @@ public class MoveCourierCommandHandlerImpl implements MoveCourierCommandHandler 
         }
 
         return Guard.combine(Guard.againstNullOrEmpty(command.courierId(), "courierId"),
-                command.location() == null ? GeneralErrors.valueIsRequired("location") : null);
+                Guard.againstOutOfRange(command.locationX(), Location.MIN_COORDINATE,
+                        Location.MAX_COORDINATE, "locationX"),
+                Guard.againstOutOfRange(command.locationY(), Location.MIN_COORDINATE,
+                        Location.MAX_COORDINATE, "locationY"));
     }
 }
