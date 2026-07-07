@@ -1,7 +1,6 @@
 package microarch.delivery.adapters.in.http;
 
 import api.ApiApi;
-import libs.errs.DomainInvariantException;
 import libs.errs.GeneralErrors;
 import libs.errs.Result;
 import libs.errs.UnitResult;
@@ -146,22 +145,19 @@ public class DeliveryHttpController implements ApiApi {
 
     @Override
     public ResponseEntity<Void> moveCourier(UUID courierId, Location location) {
-        if (location == null || location.getX() == null || location.getY() == null) {
+        if (location == null) {
             return badRequest("location");
         }
 
-        microarch.delivery.core.domain.model.kernel.Location newLocation;
-        try {
-            newLocation = new microarch.delivery.core.domain.model.kernel.Location(
-                    location.getX(),
-                    location.getY()
-            );
-        } catch (DomainInvariantException ex) {
-            return error(HttpStatus.BAD_REQUEST, ex.getMessage());
+        Integer x = location.getX();
+        Integer y = location.getY();
+
+        if (x == null || y == null) {
+            return badRequest("location");
         }
 
         UnitResult<libs.errs.Error> result = moveCourier.handle(
-                new MoveCourierCommand(courierId, newLocation)
+                new MoveCourierCommand(courierId, x, y)
         );
 
         if (result.isFailure()) {
