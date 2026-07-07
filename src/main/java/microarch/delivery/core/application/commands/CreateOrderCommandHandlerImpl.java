@@ -13,8 +13,6 @@ import microarch.delivery.core.ports.OrderRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.concurrent.ThreadLocalRandom;
-
 @Service
 public class CreateOrderCommandHandlerImpl implements CreateOrderCommandHandler {
 
@@ -41,15 +39,19 @@ public class CreateOrderCommandHandlerImpl implements CreateOrderCommandHandler 
             return UnitResult.failure(volumeResult.getError());
         }
 
-        var location = geoClient.getGeolocation(command.street());
+        Result<Location, Error> locationResult = geoClient.getGeolocation(command.street());
 
-        if (location.isFailure()) {
-            return UnitResult.failure(location.getError());
+        if (locationResult == null) {
+            return UnitResult.failure(GeneralErrors.valueIsRequired("location"));
+        }
+
+        if (locationResult.isFailure()) {
+            return UnitResult.failure(locationResult.getError());
         }
 
         Result<Order, Error> orderResult = Order.create(
                 command.orderId(),
-                location.getValue(),
+                locationResult.getValue(),
                 volumeResult.getValue()
         );
 
@@ -73,17 +75,6 @@ public class CreateOrderCommandHandlerImpl implements CreateOrderCommandHandler 
                 Guard.againstNullOrEmpty(command.street(), "street"),
                 Guard.againstNullOrEmpty(command.house(), "house"),
                 Guard.againstNullOrEmpty(command.apartment(), "apartment")
-        );
-    }
-
-    private static Location randomLocation() {
-        return new Location(randomCoordinate(), randomCoordinate());
-    }
-
-    private static int randomCoordinate() {
-        return ThreadLocalRandom.current().nextInt(
-                Location.MIN_COORDINATE,
-                Location.MAX_COORDINATE + 1
         );
     }
 }
