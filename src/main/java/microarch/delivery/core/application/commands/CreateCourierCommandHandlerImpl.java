@@ -4,12 +4,13 @@ import libs.errs.Error;
 import libs.errs.GeneralErrors;
 import libs.errs.Guard;
 import libs.errs.Result;
-import libs.errs.UnitResult;
 import microarch.delivery.core.domain.model.courier.Courier;
 import microarch.delivery.core.domain.model.kernel.Location;
 import microarch.delivery.core.ports.CourierRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 @Service
 public class CreateCourierCommandHandlerImpl implements CreateCourierCommandHandler {
@@ -27,21 +28,22 @@ public class CreateCourierCommandHandlerImpl implements CreateCourierCommandHand
 
     @Override
     @Transactional
-    public UnitResult<Error> handle(CreateCourierCommand command) {
+    public Result<UUID, Error> handle(CreateCourierCommand command) {
         Error validationError = validate(command);
 
         if (validationError != null) {
-            return UnitResult.failure(validationError);
+            return Result.failure(validationError);
         }
 
         Result<Courier, Error> courierResult = Courier.create(command.name(), INITIAL_LOCATION);
 
         if (courierResult.isFailure()) {
-            return UnitResult.failure(courierResult.getError());
+            return Result.failure(courierResult.getError());
         }
 
-        courierRepository.add(courierResult.getValue());
-        return UnitResult.success();
+        Courier courier = courierResult.getValue();
+        courierRepository.add(courier);
+        return Result.success(courier.getId());
     }
 
     private static Error validate(CreateCourierCommand command) {
