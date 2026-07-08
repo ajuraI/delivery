@@ -2,7 +2,6 @@ package microarch.delivery.core.application.commands;
 
 import libs.errs.Error;
 import libs.errs.GeneralErrors;
-import libs.errs.Guard;
 import libs.errs.Result;
 import libs.errs.UnitResult;
 import microarch.delivery.core.domain.model.kernel.Location;
@@ -27,8 +26,11 @@ public class CreateOrderCommandHandlerImpl implements CreateOrderCommandHandler 
     @Override
     @Transactional
     public UnitResult<Error> handle(CreateOrderCommand command) {
-        Error validationError = validate(command);
+        if (command == null) {
+            return UnitResult.failure(GeneralErrors.valueIsRequired("command"));
+        }
 
+        Error validationError = command.validate();
         if (validationError != null) {
             return UnitResult.failure(validationError);
         }
@@ -61,20 +63,5 @@ public class CreateOrderCommandHandlerImpl implements CreateOrderCommandHandler 
 
         orderRepository.add(orderResult.getValue());
         return UnitResult.success();
-    }
-
-    private static Error validate(CreateOrderCommand command) {
-        if (command == null) {
-            return GeneralErrors.valueIsRequired("command");
-        }
-
-        return Guard.combine(
-                Guard.againstNullOrEmpty(command.orderId(), "orderId"),
-                Guard.againstNullOrEmpty(command.country(), "country"),
-                Guard.againstNullOrEmpty(command.city(), "city"),
-                Guard.againstNullOrEmpty(command.street(), "street"),
-                Guard.againstNullOrEmpty(command.house(), "house"),
-                Guard.againstNullOrEmpty(command.apartment(), "apartment")
-        );
     }
 }
