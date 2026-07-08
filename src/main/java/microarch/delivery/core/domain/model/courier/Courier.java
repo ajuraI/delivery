@@ -129,6 +129,24 @@ public class Courier extends Aggregate<UUID> {
         return assignment.get().complete(location);
     }
 
+    public UnitResult<Error> completeAssignmentForOrder(UUID orderId) {
+        Error validationError = Guard.againstNullOrEmpty(orderId, "orderId");
+
+        if (validationError != null) {
+            return UnitResult.failure(validationError);
+        }
+
+        Optional<Assignment> assignment = assignments.stream()
+                .filter(item -> item.getOrderId().equals(orderId))
+                .findFirst();
+
+        if (assignment.isEmpty()) {
+            return UnitResult.failure(GeneralErrors.notFound("assignment", orderId));
+        }
+
+        return assignment.get().complete(location);
+    }
+
     public UnitResult<Error> changeLocation(Location newLocation) {
         Error validationError = required(newLocation, "newLocation");
 
