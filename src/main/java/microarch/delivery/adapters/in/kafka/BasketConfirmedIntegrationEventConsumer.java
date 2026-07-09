@@ -29,6 +29,7 @@ public class BasketConfirmedIntegrationEventConsumer {
             groupId = "${spring.kafka.consumer.group-id}"
     )
     public void listen(String message) {
+        log.info("got message: {}", message);
         try {
             BasketEventsProto.BasketConfirmedIntegrationEvent.Builder builder =
                     BasketEventsProto.BasketConfirmedIntegrationEvent.newBuilder();
@@ -48,7 +49,6 @@ public class BasketConfirmedIntegrationEventConsumer {
 
             if (result.isFailure()) {
                 log.error("Failed to create order from basket event: {}", result.getError().serialize());
-                return;
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
