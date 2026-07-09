@@ -2,7 +2,6 @@ package microarch.delivery.core.application.commands;
 
 import libs.errs.Error;
 import libs.errs.GeneralErrors;
-import libs.errs.Guard;
 import libs.errs.UnitResult;
 import microarch.delivery.core.domain.model.courier.Courier;
 import microarch.delivery.core.domain.model.kernel.Location;
@@ -22,8 +21,11 @@ public class MoveCourierCommandHandlerImpl implements MoveCourierCommandHandler 
     @Override
     @Transactional
     public UnitResult<Error> handle(MoveCourierCommand command) {
-        Error validationError = validate(command);
+        if (command == null) {
+            return UnitResult.failure(GeneralErrors.valueIsRequired("command"));
+        }
 
+        Error validationError = command.validate();
         if (validationError != null) {
             return UnitResult.failure(validationError);
         }
@@ -43,17 +45,5 @@ public class MoveCourierCommandHandlerImpl implements MoveCourierCommandHandler 
 
         courierRepository.update(courier);
         return UnitResult.success();
-    }
-
-    private static Error validate(MoveCourierCommand command) {
-        if (command == null) {
-            return GeneralErrors.valueIsRequired("command");
-        }
-
-        return Guard.combine(Guard.againstNullOrEmpty(command.courierId(), "courierId"),
-                Guard.againstOutOfRange(command.locationX(), Location.MIN_COORDINATE,
-                        Location.MAX_COORDINATE, "locationX"),
-                Guard.againstOutOfRange(command.locationY(), Location.MIN_COORDINATE,
-                        Location.MAX_COORDINATE, "locationY"));
     }
 }

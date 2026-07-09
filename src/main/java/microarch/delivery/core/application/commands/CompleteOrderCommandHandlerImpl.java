@@ -2,7 +2,6 @@ package microarch.delivery.core.application.commands;
 
 import libs.errs.Error;
 import libs.errs.GeneralErrors;
-import libs.errs.Guard;
 import libs.errs.UnitResult;
 import microarch.delivery.core.domain.model.courier.Courier;
 import microarch.delivery.core.domain.model.order.Order;
@@ -25,8 +24,11 @@ public class CompleteOrderCommandHandlerImpl implements CompleteOrderCommandHand
     @Override
     @Transactional
     public UnitResult<Error> handle(CompleteOrderCommand command) {
-        Error validationError = validate(command);
+        if (command == null) {
+            return UnitResult.failure(GeneralErrors.valueIsRequired("command"));
+        }
 
+        Error validationError = command.validate();
         if (validationError != null) {
             return UnitResult.failure(validationError);
         }
@@ -60,16 +62,5 @@ public class CompleteOrderCommandHandlerImpl implements CompleteOrderCommandHand
         courierRepository.update(courier);
         orderRepository.update(order);
         return UnitResult.success();
-    }
-
-    private static Error validate(CompleteOrderCommand command) {
-        if (command == null) {
-            return GeneralErrors.valueIsRequired("command");
-        }
-
-        return Guard.combine(
-                Guard.againstNullOrEmpty(command.courierId(), "courierId"),
-                Guard.againstNullOrEmpty(command.orderId(), "orderId")
-        );
     }
 }
