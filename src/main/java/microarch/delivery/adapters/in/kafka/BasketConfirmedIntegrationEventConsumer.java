@@ -1,6 +1,5 @@
 package microarch.delivery.adapters.in.kafka;
 
-import com.google.protobuf.util.JsonFormat;
 import libs.errs.Error;
 import libs.errs.UnitResult;
 import microarch.delivery.core.application.commands.CreateOrderCommand;
@@ -28,14 +27,11 @@ public class BasketConfirmedIntegrationEventConsumer {
             topics = "${app.kafka.basket-events-topic}",
             groupId = "${spring.kafka.consumer.group-id}"
     )
-    public void listen(String message) {
-        log.info("got message: {}", message);
+    public void listen(byte[] message) {
+        log.debug("Got basket confirmed integration event payload: {} bytes", message.length);
         try {
-            BasketEventsProto.BasketConfirmedIntegrationEvent.Builder builder =
-                    BasketEventsProto.BasketConfirmedIntegrationEvent.newBuilder();
-            JsonFormat.parser().merge(message, builder);
-
-            BasketEventsProto.BasketConfirmedIntegrationEvent event = builder.build();
+            BasketEventsProto.BasketConfirmedIntegrationEvent event =
+                    BasketEventsProto.BasketConfirmedIntegrationEvent.parseFrom(message);
 
             UnitResult<Error> result = createOrderCommandHandler.handle(new CreateOrderCommand(
                     UUID.fromString(event.getBasketId()),
