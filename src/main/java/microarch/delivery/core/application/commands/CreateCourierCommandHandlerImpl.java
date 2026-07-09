@@ -2,7 +2,6 @@ package microarch.delivery.core.application.commands;
 
 import libs.errs.Error;
 import libs.errs.GeneralErrors;
-import libs.errs.Guard;
 import libs.errs.Result;
 import microarch.delivery.core.domain.model.courier.Courier;
 import microarch.delivery.core.domain.model.kernel.Location;
@@ -29,8 +28,11 @@ public class CreateCourierCommandHandlerImpl implements CreateCourierCommandHand
     @Override
     @Transactional
     public Result<UUID, Error> handle(CreateCourierCommand command) {
-        Error validationError = validate(command);
+        if (command == null) {
+            return Result.failure(GeneralErrors.valueIsRequired("command"));
+        }
 
+        Error validationError = command.validate();
         if (validationError != null) {
             return Result.failure(validationError);
         }
@@ -44,13 +46,5 @@ public class CreateCourierCommandHandlerImpl implements CreateCourierCommandHand
         Courier courier = courierResult.getValue();
         courierRepository.add(courier);
         return Result.success(courier.getId());
-    }
-
-    private static Error validate(CreateCourierCommand command) {
-        if (command == null) {
-            return GeneralErrors.valueIsRequired("command");
-        }
-
-        return Guard.againstNullOrEmpty(command.name(), "name");
     }
 }
