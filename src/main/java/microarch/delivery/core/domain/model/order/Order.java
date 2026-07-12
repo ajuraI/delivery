@@ -10,6 +10,7 @@ import lombok.Getter;
 import microarch.delivery.core.domain.model.kernel.Location;
 import microarch.delivery.core.domain.model.kernel.Volume;
 import microarch.delivery.core.domain.model.order.events.OrderAssignedDomainEvent;
+import microarch.delivery.core.domain.model.order.events.OrderCompletedDomainEvent;
 
 import java.util.UUID;
 
@@ -73,6 +74,7 @@ public class Order extends Aggregate<UUID> {
         }
 
         status = OrderStatus.COMPLETED;
+        raiseDomainEvent(new OrderCompletedDomainEvent(getId()));
         return UnitResult.success();
     }
 

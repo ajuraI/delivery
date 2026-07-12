@@ -2,6 +2,7 @@ package microarch.delivery.adapters.out.kafka;
 
 import libs.ddd.DomainEvent;
 import microarch.delivery.core.domain.model.order.events.OrderAssignedDomainEvent;
+import microarch.delivery.core.domain.model.order.events.OrderCompletedDomainEvent;
 import microarch.delivery.core.ports.DomainEventProducer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -35,6 +36,17 @@ public class KafkaDomainEventProducer implements DomainEventProducer {
                     kafkaTemplate.send(
                             orderEventsTopic,
                             orderAssigned.getOrderId().toString(),
+                            integrationEvent.toByteArray()
+                    ).get();
+                }
+                case OrderCompletedDomainEvent orderCompleted -> {
+                    var integrationEvent = OrderEventsProto.OrderCompletedIntegrationEvent.newBuilder()
+                            .setOrderId(orderCompleted.getOrderId().toString())
+                            .build();
+
+                    kafkaTemplate.send(
+                            orderEventsTopic,
+                            orderCompleted.getOrderId().toString(),
                             integrationEvent.toByteArray()
                     ).get();
                 }
