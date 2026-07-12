@@ -7,6 +7,7 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import libs.errs.Except;
 import java.time.Instant;
 import java.util.UUID;
 
