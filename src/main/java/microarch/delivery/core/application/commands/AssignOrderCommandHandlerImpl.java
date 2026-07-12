@@ -1,5 +1,6 @@
 package microarch.delivery.core.application.commands;
 
+import libs.ddd.DomainEventPublisher;
 import libs.errs.Error;
 import libs.errs.GeneralErrors;
 import libs.errs.Result;
@@ -20,15 +21,18 @@ public class AssignOrderCommandHandlerImpl implements AssignOrderCommandHandler 
     private final OrderRepository orderRepository;
     private final CourierRepository courierRepository;
     private final OrderDistributionDomainService orderDistributionDomainService;
+    private final DomainEventPublisher domainEventPublisher;
 
     public AssignOrderCommandHandlerImpl(
             OrderRepository orderRepository,
             CourierRepository courierRepository,
-            OrderDistributionDomainService orderDistributionDomainService
+            OrderDistributionDomainService orderDistributionDomainService,
+            DomainEventPublisher domainEventPublisher
     ) {
         this.orderRepository = orderRepository;
         this.courierRepository = courierRepository;
         this.orderDistributionDomainService = orderDistributionDomainService;
+        this.domainEventPublisher = domainEventPublisher;
     }
 
     @Override
@@ -52,8 +56,10 @@ public class AssignOrderCommandHandlerImpl implements AssignOrderCommandHandler 
             return UnitResult.failure(dispatchResult.getError());
         }
 
-        courierRepository.update(dispatchResult.getValue());
+        Courier courier = dispatchResult.getValue();
+        courierRepository.update(courier);
         orderRepository.update(order);
+        domainEventPublisher.publish(List.of(courier, order));
         return UnitResult.success();
     }
 }
