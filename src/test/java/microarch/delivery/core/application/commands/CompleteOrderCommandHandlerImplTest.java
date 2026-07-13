@@ -1,5 +1,6 @@
 package microarch.delivery.core.application.commands;
 
+import libs.ddd.DomainEventPublisher;
 import libs.errs.Error;
 import libs.errs.UnitResult;
 import microarch.delivery.core.domain.model.courier.AssignmentStatus;
@@ -13,6 +14,7 @@ import microarch.delivery.core.ports.OrderRepository;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,6 +28,7 @@ class CompleteOrderCommandHandlerImplTest {
     void completesCourierAssignmentAndOrderAndSavesChanges() {
         OrderRepository orderRepository = mock(OrderRepository.class);
         CourierRepository courierRepository = mock(CourierRepository.class);
+        DomainEventPublisher domainEventPublisher = mock(DomainEventPublisher.class);
         Order order = Order.create(
                 UUID.randomUUID(),
                 new Location(1, 1),
@@ -36,7 +39,11 @@ class CompleteOrderCommandHandlerImplTest {
         order.assign();
         when(courierRepository.getById(courier.getId())).thenReturn(Optional.of(courier));
         when(orderRepository.getById(order.getId())).thenReturn(Optional.of(order));
-        CompleteOrderCommandHandler handler = new CompleteOrderCommandHandlerImpl(courierRepository, orderRepository);
+        CompleteOrderCommandHandler handler = new CompleteOrderCommandHandlerImpl(
+                courierRepository,
+                orderRepository,
+                domainEventPublisher
+        );
 
         UnitResult<Error> result = handler.handle(new CompleteOrderCommand(courier.getId(), order.getId()));
 
@@ -45,5 +52,6 @@ class CompleteOrderCommandHandlerImplTest {
         assertThat(courier.getAssignments().getFirst().getStatus()).isEqualTo(AssignmentStatus.COMPLETED);
         verify(orderRepository).update(order);
         verify(courierRepository).update(courier);
+        verify(domainEventPublisher).publish(List.of(courier, order));
     }
 }

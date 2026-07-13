@@ -1,5 +1,6 @@
 package microarch.delivery.core.application.commands;
 
+import libs.ddd.DomainEventPublisher;
 import libs.errs.Error;
 import libs.errs.UnitResult;
 import microarch.delivery.core.domain.model.courier.Courier;
@@ -28,6 +29,7 @@ class AssignOrderCommandHandlerImplTest {
     void assignsCreatedOrderToCourierAndSavesChanges() {
         OrderRepository orderRepository = mock(OrderRepository.class);
         CourierRepository courierRepository = mock(CourierRepository.class);
+        DomainEventPublisher domainEventPublisher = mock(DomainEventPublisher.class);
         Order order = Order.create(
                 UUID.randomUUID(),
                 new Location(2, 2),
@@ -37,7 +39,12 @@ class AssignOrderCommandHandlerImplTest {
         when(orderRepository.getAnyCreated()).thenReturn(Optional.of(order));
         when(courierRepository.getAll()).thenReturn(List.of(courier));
         OrderDistributionDomainService orderDistributionDomainService = new OrderDistributionDomainServiceImpl();
-        AssignOrderCommandHandler handler = new AssignOrderCommandHandlerImpl(orderRepository, courierRepository, orderDistributionDomainService);
+        AssignOrderCommandHandler handler = new AssignOrderCommandHandlerImpl(
+                orderRepository,
+                courierRepository,
+                orderDistributionDomainService,
+                domainEventPublisher
+        );
 
         UnitResult<Error> result = handler.handle(new AssignOrderCommand());
 
@@ -47,5 +54,6 @@ class AssignOrderCommandHandlerImplTest {
         assertThat(courier.getAssignments().getFirst().getOrderId()).isEqualTo(order.getId());
         verify(orderRepository).update(order);
         verify(courierRepository).update(courier);
+        verify(domainEventPublisher).publish(List.of(courier, order));
     }
 }
